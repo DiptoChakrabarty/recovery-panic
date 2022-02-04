@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"runtime/debug"
 
 	"github.com/gin-gonic/gin"
 )
@@ -10,8 +11,8 @@ import (
 func main() {
 	router := gin.New()
 	router.Use(gin.Recovery())
-
-	defaultRoutes := router.Group("/", recoverPanic())
+	var dev bool
+	defaultRoutes := router.Group("/", recoverPanic(dev))
 	{
 		defaultRoutes.GET("", defaultPage)
 		defaultRoutes.GET("/panic", panicPage)
@@ -27,14 +28,22 @@ func defaultPage(ctx *gin.Context) {
 	})
 }
 
-func recoverPanic() gin.HandlerFunc {
+func recoverPanic(dev bool) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		defer func() {
 			if err := recover(); err != nil {
 				log.Println(err)
-				ctx.JSON(http.StatusInternalServerError, gin.H{
-					"Message": "Error Occured",
-				})
+				stack := debug.Stack()
+				log.Println(string(stack))
+				if !dev {
+					ctx.JSON(http.StatusInternalServerError, gin.H{
+						"Message": "Error Occured",
+					})
+				} else {
+					ctx.JSON(http.StatusInternalServerError, gin.H{
+						"Message": err,
+					})
+				}
 			}
 		}()
 		ctx.Next()
