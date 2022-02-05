@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"runtime/debug"
 
+	"github.com/DiptoChakrabarty/recovery-panic/routes"
 	"github.com/gin-gonic/gin"
 )
 
@@ -15,18 +16,12 @@ func main() {
 	dev = true
 	defaultRoutes := router.Group("/", recoverPanic(dev))
 	{
-		defaultRoutes.GET("", defaultPage)
-		defaultRoutes.GET("/panic", panicPage)
-		defaultRoutes.GET("/paniclater", panicAfterMessage)
-		defaultRoutes.GET("/panicrandom", panicCase)
+		defaultRoutes.GET("", routes.DefaultPage)
+		defaultRoutes.GET("/panic", routes.PanicPage)
+		defaultRoutes.GET("/paniclater", routes.PanicAfterMessage)
+		defaultRoutes.GET("/panicrandom", routes.PanicCase)
 	}
 	router.Run(":5000")
-}
-
-func defaultPage(ctx *gin.Context) {
-	ctx.JSON(http.StatusOK, gin.H{
-		"Message": "Home Page",
-	})
 }
 
 func recoverPanic(dev bool) gin.HandlerFunc {
@@ -49,29 +44,4 @@ func recoverPanic(dev bool) gin.HandlerFunc {
 		}()
 		ctx.Next()
 	}
-}
-
-func randomPanic() {
-	panic("Crashed Application")
-}
-
-func panicPage(ctx *gin.Context) {
-	panic("Crashed Application")
-}
-
-func panicAfterMessage(ctx *gin.Context) {
-	ctx.JSON(http.StatusInternalServerError, gin.H{
-		"Message": "Before a Panic",
-	})
-	panic("This is the Panic")
-}
-
-func panicCase(ctx *gin.Context) {
-	defer func() {
-		err := recover()
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"Message": err,
-		})
-	}()
-	randomPanic()
 }
