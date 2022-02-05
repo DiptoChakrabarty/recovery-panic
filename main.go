@@ -12,6 +12,7 @@ func main() {
 	router := gin.New()
 	router.Use(gin.Recovery())
 	var dev bool
+	dev = true
 	defaultRoutes := router.Group("/", recoverPanic(dev))
 	{
 		defaultRoutes.GET("", defaultPage)
