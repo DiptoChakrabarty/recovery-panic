@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"runtime/debug"
 
+	"github.com/DiptoChakrabarty/recovery-panic/types"
 	"github.com/gin-gonic/gin"
 )
 
@@ -26,6 +27,9 @@ func RecoverPanic(dev bool) gin.HandlerFunc {
 				}
 			}
 		}()
+		nrw := &types.UpdatedResponseWriter{ResponseWriter: ctx.Writer}
+		nrw.Flush()
+		ctx.Writer = nrw
 		ctx.Next()
 	}
 }
