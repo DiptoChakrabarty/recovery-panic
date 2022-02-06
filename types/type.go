@@ -27,8 +27,10 @@ func (ur *UpdatedResponseWriter) Flush() {
 		_, err := ur.ResponseWriter.WriteString(w)
 		fmt.Println(ur.writes)
 		if err != nil {
-			fmt.Println("There was an error")
+			ur.ResponseWriter.Flush()
+			return
 		}
 	}
-	fmt.Println("There was no error")
+	ur.ResponseWriter.Flush()
+	return
 }
